@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
@@ -8,18 +9,18 @@ using P3AddNewFunctionalityDotNetCore.Models.Entities;
 using P3AddNewFunctionalityDotNetCore.Models.Repositories;
 using P3AddNewFunctionalityDotNetCore.Models.Services;
 using P3AddNewFunctionalityDotNetCore.Models.ViewModels;
-using System;
 using System.Collections.Generic;
 using Xunit;
 
-namespace P3AddNewFunctionalityDotNetCore.Tests
+namespace P3AddNewFunctionalityDotNetCore.Tests.Integration
 {
-    public class ProductServiceTests
+    [Collection("Sequential")]
+    public class ProductServiceIntegrationTests
     {
         IStringLocalizerFactory _factory;
         IStringLocalizer<ProductService> _localizer;
 
-        public ProductServiceTests()
+        public ProductServiceIntegrationTests()
         {
             var localizationOptions = Options.Create(new LocalizationOptions());
             this._factory = new ResourceManagerStringLocalizerFactory(localizationOptions, NullLoggerFactory.Instance);
@@ -44,36 +45,43 @@ namespace P3AddNewFunctionalityDotNetCore.Tests
                 IOrderRepository orderRepository = new OrderRepository(context);
                 IProductService productService = new ProductService(cart, productRepository, orderRepository, _localizer);
 
-                ProductViewModel product1 = new ProductViewModel();
-                product1.Name = "Dummy product";
-                product1.Price = "159.99";
-                product1.Stock = "25";
-                product1.Description = "Dummy description";
-                product1.Details = "Dummy details";
-
-                ProductViewModel product2 = new ProductViewModel();
-                product2.Name = "Another dummy product";
-                product2.Price = "259.99";
-                product2.Stock = "15";
-                product2.Description = "Another dummy description";
-                product2.Details = "Another dummy details";
-
-                ProductViewModel product3 = new ProductViewModel();
-                product3.Name = "Last dummy product";
-                product3.Price = "359.99";
-                product3.Stock = "50";
-                product3.Description = "Last dummy description";
-                product3.Details = "Last dummy details";
+                List<ProductViewModel> NewSeedData = new List<ProductViewModel>()
+                {
+                    new ProductViewModel()
+                    {
+                        Name = "New product 1",
+                        Price = "100",
+                        Stock = "50",
+                        Description = "Description for new product 1",
+                        Details = "Details for new product 1"
+                    },
+                    new ProductViewModel()
+                    {
+                        Name = "New product 2",
+                        Price = "200",
+                        Stock = "75",
+                        Description = "Description for new product 2",
+                        Details = "Details for new product 2"
+                    },
+                    new ProductViewModel()
+                    {
+                        Name = "New product 3",
+                        Price = "300",
+                        Stock = "100",
+                        Description = "Description for new product 3",
+                        Details = "Details for new product 3"
+                    },
+                };
 
                 // Act
-                productService.SaveProduct(product1);
-                productService.SaveProduct(product2);
-                productService.SaveProduct(product3);
+                productService.SaveProduct(NewSeedData[0]);
+                productService.SaveProduct(NewSeedData[1]);
+                productService.SaveProduct(NewSeedData[2]);
 
                 // Assert
-                Assert.NotNull(productService.GetAllProducts().Find(x => x.Name == product1.Name));
-                Assert.NotNull(productService.GetAllProducts().Find(x => x.Name == product2.Name));
-                Assert.NotNull(productService.GetAllProducts().Find(x => x.Name == product3.Name));
+                Assert.NotNull(productService.GetAllProducts().Find(x => x.Name == NewSeedData[0].Name));
+                Assert.NotNull(productService.GetAllProducts().Find(x => x.Name == NewSeedData[1].Name));
+                Assert.NotNull(productService.GetAllProducts().Find(x => x.Name == NewSeedData[2].Name));
             }
         }
 
@@ -295,3 +303,4 @@ namespace P3AddNewFunctionalityDotNetCore.Tests
         #endregion
     }
 }
+
