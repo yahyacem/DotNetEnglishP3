@@ -96,18 +96,20 @@ namespace P3AddNewFunctionalityDotNetCore.Tests.Integration
                 IOrderRepository orderRepository = new OrderRepository(context);
                 IProductService productService = new ProductService(cart, productRepository, orderRepository, _localizer);
 
-                ProductViewModel product = new ProductViewModel();
-                product.Name = "Dummy product";
-                product.Price = "399.99";
-                product.Stock = "10";
-                product.Description = "Dummy description";
-                product.Details = "Dummy details";
+                ProductViewModel product = new ProductViewModel()
+                {
+                    Name = "Dummy product",
+                    Price = "400",
+                    Stock = "10",
+                    Description = "Dummy description",
+                    Details = "Dummy details"
+            };
 
                 // Add product to list of products
                 productService.SaveProduct(product);
 
                 // Get new product object
-                Product createdProduct = productService.GetAllProducts().Find(x => x.Name == "Dummy product");
+                Product createdProduct = productService.GetAllProducts().Find(x => x.Name == product.Name);
 
                 // Add it to cart
                 cart.AddItem(createdProduct, 3);
@@ -123,7 +125,7 @@ namespace P3AddNewFunctionalityDotNetCore.Tests.Integration
                 // Assert
 
                 // Check if product has been deleted from list of products
-                Assert.Null(productService.GetAllProducts().Find(x => x.Name == "Dummy product"));
+                Assert.Null(productService.GetAllProducts().Find(x => x.Name == product.Name));
 
                 // Check if product has been deleted from cart in every cart line
                 Assert.Null(((List<CartLine>)cart.Lines).Find(x => x.Product.Id == createdProduct.Id));
