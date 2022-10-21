@@ -72,7 +72,14 @@ namespace P3AddNewFunctionalityDotNetCore.Tests.Unit
         [Fact]
         public void CreateProduct()
         {
+            var dbListProducts = new List<Product>();
+
             var mockSet = new Mock<DbSet<Product>>();
+            mockSet.As<IQueryable<Product>>().Setup(m => m.Provider).Returns(dbListProducts.AsQueryable().Provider);
+            mockSet.As<IQueryable<Product>>().Setup(m => m.Expression).Returns(dbListProducts.AsQueryable().Expression);
+            mockSet.As<IQueryable<Product>>().Setup(m => m.ElementType).Returns(dbListProducts.AsQueryable().ElementType);
+            mockSet.As<IQueryable<Product>>().Setup(m => m.GetEnumerator()).Returns(() => dbListProducts.AsQueryable().GetEnumerator());
+            mockSet.Setup(m => m.Add(It.IsAny<Product>())).Callback<Product>((entity) => dbListProducts.Add(entity));
 
             var mockContext = new Mock<P3Referential>(GetOptions());
             mockContext.Setup(m => m.Product).Returns(mockSet.Object);
@@ -121,6 +128,10 @@ namespace P3AddNewFunctionalityDotNetCore.Tests.Unit
                 // Assert
                 mockSet.Verify(m => m.Add(It.IsAny<Product>()), Times.Exactly(3));
                 mockContext.Verify(m => m.SaveChanges(), Times.Exactly(3));
+
+                Assert.NotNull(dbListProducts.Find(x => x.Name == NewSeedData[0].Name));
+                Assert.NotNull(dbListProducts.Find(x => x.Name == NewSeedData[1].Name));
+                Assert.NotNull(dbListProducts.Find(x => x.Name == NewSeedData[2].Name));
             }
         }
 
